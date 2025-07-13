@@ -1,0 +1,47 @@
+{    
+    "default": {
+        "bgcolor": "#F0F2F5",
+        "bdcolor": "#C0C0C0",
+        "font_color": "#555555",
+        "button_bg": "#0077B6",
+        "button_fg": "#FFFFFF",
+        "hover_bg": "#005F8C",
+        "title_color": "#333333"   
+    },
+    "dark": {
+        "bgcolor": "#121212",
+        "bdcolor": "#1e1e1e",
+        "font_color": "#e0e0e0",
+        "button_bg": "#bb86fc",
+        "button_fg": "#121212",
+        "hover_bg": "#9b59b6",
+        "title_color": "#ffffff"
+    },
+    "pastel": {
+        "bgcolor": "#fff0f5",
+        "bdcolor": "#ffe4e1",
+        "font_color": "#5c5c5c",
+        "button_bg": "#f48fb1",
+        "button_fg": "#ffffff",
+        "hover_bg": "#ec407a",
+        "title_color": "#4a4a4a"
+    },
+    "matrix": {
+        "bgcolor": "#000000",
+        "bdcolor": "#003300",
+        "font_color": "#00ff00",
+        "button_bg": "#00cc00",
+        "button_fg": "#000000",
+        "hover_bg": "#009900",
+        "title_color": "#00ff00"
+    },
+    "sky": {
+        "bgcolor": "#e0f7fa",
+        "bdcolor": "#b2ebf2",
+        "font_color": "#00796b",
+        "button_bg": "#00bcd4",
+        "button_fg": "#ffffff",
+        "hover_bg": "#0097a7",
+        "title_color": "#006064"
+    }
+}
