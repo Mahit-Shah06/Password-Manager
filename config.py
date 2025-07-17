@@ -10,7 +10,7 @@ title_font = ("Segoe UI", 32, "bold")
 with open("themes.json", "r") as file:
     themes = json.load(file)
 
-selected_theme = "matrix"
+selected_theme = "pastel"
 
 theme = themes[selected_theme]
 

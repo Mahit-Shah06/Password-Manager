@@ -13,8 +13,8 @@ class GUI:
         self.height = min(config.height, screen_height - 100)
         self.window.geometry(f"{self.width}x{self.height}")
 
-        self.entry_boxes = {}
         self.top_frame, self.left_frame, self.right_frame = self.create_frames()
+        self.entry_boxes = self.left_grid()
 
         self.left_grid()
         self.right_grid()
@@ -69,13 +69,11 @@ class GUI:
             label = kt.Label(grid_container, text = field_text, bg = config.bgcolor, font = config.text_font, fg = config.font_color)
             label.grid(row = index, column = 0, sticky = "ne", padx = (10, 5), pady = 5)
 
-            if field_text == "Website : ":
-                entry = ttk.Combobox(grid_container, textvariable = "website_var", values = "website_list", width = 37)
-            elif field_text == "Notes : ":
+            if field_text == "Notes : ":
                 entry = kt.Text(grid_container, height = 5, width = 30)
             else:
                 entry = kt.Entry(grid_container, width = 40)
-            
+
             entry.grid(row = index, column = 1, sticky = "w", padx = (5, 10), pady = 5)
             entry_boxes[field_text] = entry
 
