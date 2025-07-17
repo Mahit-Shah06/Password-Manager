@@ -1,6 +1,7 @@
 import tkinter as kt
 from tkinter import ttk
 import config
+import db
 
 class GUI:
     def __init__(self):
@@ -128,7 +129,14 @@ class GUI:
         return search_box
 
     def add_password(self):
-        pass
+        website = self.entry_boxes["Website : "].get()
+        email = self.entry_boxes["Email : "].get()
+        password = self.entry_boxes["Password : "].get()
+        notes = self.entry_boxes["Notes : "].get("1.0", "end-1c")
+
+        data = [website, email, password, notes]
+
+        db.add_data(data)
 
     def import_file(self):
         pass
