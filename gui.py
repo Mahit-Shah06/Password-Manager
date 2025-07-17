@@ -14,10 +14,11 @@ class GUI:
         self.window.geometry(f"{self.width}x{self.height}")
 
         self.top_frame, self.left_frame, self.right_frame = self.create_frames()
-        self.entry_boxes = self.left_grid()
 
-        self.left_grid()
+        self.entry_boxes = self.left_grid()
         self.right_grid()
+
+        self.show_passwords()
 
     def create_frames(self):
         frames = {}
@@ -105,9 +106,29 @@ class GUI:
         password = self.entry_boxes["Password : "].get()
         notes = self.entry_boxes["Notes : "].get("1.0", "end-1c")
 
-        data = [website, email, password, notes]
+        if not website or not email or not password:
+            kt.messagebox.showerror(title = "Error", message = "Please fill in all the required fields.")
+            return
 
-        db.add_data(data)
+        is_duplicate = False
+        for entry in self.data:
+            if entry["website"] == website and entry["email"] == email and entry["password"] == password:
+                is_duplicate = True
+                kt.messagebox.showerror(title = "Error", message=f"This email and password already exists for {website}.")
+                break
+
+        if not is_duplicate:
+            data = [website, email, password, notes]
+            db.add_data(data)
+
+            self.entry_boxes["Website : "].delete(0, "end")
+            self.entry_boxes["Email : "].delete(0, "end")
+            self.entry_boxes["Password : "].delete(0, "end")
+            self.entry_boxes["Notes : "].delete("1.0", "end")
+
+            kt.messagebox.showinfo(title="Success", message="Data added successfully!")
+
+            self.show_passwords()
 
     def import_file(self):
         pass
@@ -143,11 +164,12 @@ class GUI:
         return search_box
     
     def show_passwords(self):
-        data = db.fetch_data()
+        self.data = db.fetch_data()
+
         for item in self.password_table.get_children():
             self.password_table.delete(item)
         
-        for entry in data:
+        for entry in self.data:
             self.password_table.insert("", "end", values=(entry["website"], entry["email"], entry["password"], entry["notes"]))
 
     def run(self):

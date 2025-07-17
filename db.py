@@ -14,7 +14,6 @@ def add_data(data):
                   "password" : data[2],
                   "notes" : data[3]}
     collection.insert_one(data_entry)
-    print("Data added successfully.")
 
 def fetch_data():
     store_data = collection.find({})
