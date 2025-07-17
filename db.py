@@ -16,10 +16,14 @@ def add_data(data):
     collection.insert_one(data_entry)
     print("Data added successfully.")
 
-if __name__ == "__main__":
-    try:
-        # The ping command is a simple way to test the connection
-        client.admin.command('ping')
-        print("MongoDB connection successful!")
-    except Exception as e:
-        print(f"Connection failed: {e}")
+def fetch_data():
+    store_data = collection.find({})
+    return list(store_data)
+
+# if __name__ == "__main__":
+#     try:
+#         # The ping command is a simple way to test the connection
+#         client.admin.command('ping')
+#         print("MongoDB connection successful!")
+#     except Exception as e:
+#         print(f"Connection failed: {e}")

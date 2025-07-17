@@ -98,33 +98,6 @@ class GUI:
             index+=1
 
         return entry_boxes
-    
-    def right_grid(self):
-        grid_container = kt.Frame(self.right_frame, bg=config.bgcolor)
-        grid_container.place(relx = 0.5, rely = 0.4, anchor = "center")
-
-        search_label = kt.Label(grid_container, text = "Search : ", bg = config.bgcolor, font = config.text_font, fg = config.font_color)
-        search_label.grid(row = 0, column = 0, sticky = "ne", padx = (10, 5), pady = 5)
-
-        search_box = kt.Text(grid_container, height = 1, width = 40)
-        search_box.grid(row = 0, column = 2, sticky = "w", padx = (5, 10), pady = 5 )
-
-        columns = ["Website", "Email", "Password", "Notes"]
-
-        password_table = ttk.Treeview(
-            grid_container,
-            columns = columns,
-            show = "headings",
-            height = 15
-        )
-
-        for i in columns:
-            password_table.heading(i, text = i)
-            password_table.column(i, width = 182)
-
-        password_table.grid(row=1, column=0, columnspan=3, padx=10, pady=(10, 0))
-
-        return search_box
 
     def add_password(self):
         website = self.entry_boxes["Website : "].get()
@@ -141,6 +114,41 @@ class GUI:
 
     def export_file(self):
         pass
+
+    def right_grid(self):
+        grid_container = kt.Frame(self.right_frame, bg=config.bgcolor)
+        grid_container.place(relx = 0.5, rely = 0.4, anchor = "center")
+
+        search_label = kt.Label(grid_container, text = "Search : ", bg = config.bgcolor, font = config.text_font, fg = config.font_color)
+        search_label.grid(row = 0, column = 0, sticky = "ne", padx = (10, 5), pady = 5)
+
+        search_box = kt.Text(grid_container, height = 1, width = 40)
+        search_box.grid(row = 0, column = 2, sticky = "w", padx = (5, 10), pady = 5 )
+
+        columns = ["Website", "Email", "Password", "Notes"]
+
+        self.password_table = ttk.Treeview(
+            grid_container,
+            columns = columns,
+            show = "headings",
+            height = 15
+        )
+
+        for i in columns:
+            self.password_table.heading(i, text = i)
+            self.password_table.column(i, width = 182)
+
+        self.password_table.grid(row=1, column=0, columnspan=3, padx=10, pady=(10, 0))
+
+        return search_box
+    
+    def show_passwords(self):
+        data = db.fetch_data()
+        for item in self.password_table.get_children():
+            self.password_table.delete(item)
+        
+        for entry in data:
+            self.password_table.insert("", "end", values=(entry["website"], entry["email"], entry["password"], entry["notes"]))
 
     def run(self):
         self.window.mainloop()
