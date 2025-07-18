@@ -1,5 +1,6 @@
 import tkinter as kt
 from tkinter import ttk
+from tkinter import messagebox
 import config
 import db
 
@@ -12,6 +13,7 @@ class GUI:
         self.width = min(config.width, screen_width - 100)
         self.height = min(config.height, screen_height - 100)
         self.window.geometry(f"{self.width}x{self.height}")
+        self.window.resizable(False, False)
 
         self.top_frame, self.left_frame, self.right_frame = self.create_frames()
 
@@ -107,14 +109,14 @@ class GUI:
         notes = self.entry_boxes["Notes : "].get("1.0", "end-1c")
 
         if not website or not email or not password:
-            kt.messagebox.showerror(title = "Error", message = "Please fill in all the required fields.")
+            messagebox.showerror(title = "Error", message = "Please fill in all the required fields.")
             return
 
         is_duplicate = False
         for entry in self.data:
             if entry["website"] == website and entry["email"] == email and entry["password"] == password:
                 is_duplicate = True
-                kt.messagebox.showerror(title = "Error", message=f"This email and password already exists for {website}.")
+                messagebox.showerror(title = "Error", message=f"This email and password already exists for {website}.")
                 break
 
         if not is_duplicate:
@@ -126,7 +128,7 @@ class GUI:
             self.entry_boxes["Password : "].delete(0, "end")
             self.entry_boxes["Notes : "].delete("1.0", "end")
 
-            kt.messagebox.showinfo(title="Success", message="Data added successfully!")
+            messagebox.showinfo(title="Success", message="Data added successfully!")
 
             self.show_passwords()
 
