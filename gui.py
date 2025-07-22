@@ -115,7 +115,7 @@ class GUI:
         is_duplicate = False
         for entry in self.data:
             if entry["website"] == website and entry["email"] == email and entry["password"] == password:
-                is_duplicate = True
+                is_duplicate = True 
                 messagebox.showerror(title = "Error", message=f"This email and password already exists for {website}.")
                 break
 
