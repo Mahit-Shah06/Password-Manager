@@ -22,7 +22,7 @@ class GUI:
         self.right_grid()
 
         self.encrypter = Encrypter()
-        self.show_passwords()
+        self.decrypted_password_list = self.show_passwords()
 
     def create_frames(self):
         frames = {}
@@ -115,10 +115,14 @@ class GUI:
             return
 
         is_duplicate = False
+        
         for entry in self.data:
-            if entry["website"] == website and entry["email"] == email and entry["password"] == password:
-                is_duplicate = True 
-                messagebox.showerror(title = "Error", message=f"This email and password already exists for {website}.")
+            for list_pass in self.decrypted_password_list:
+                if entry["website"] == website and entry["email"] == email and list_pass == password:
+                    is_duplicate = True 
+                    messagebox.showerror(title = "Error", message=f"This email and password already exists for {website}.")
+                    break
+            if is_duplicate:
                 break
 
         if not is_duplicate:
@@ -170,6 +174,7 @@ class GUI:
     
     def show_passwords(self):
         self.data = db.fetch_data()
+        decrypted_passwords = []
 
         for item in self.password_table.get_children():
             self.password_table.delete(item)
@@ -178,6 +183,9 @@ class GUI:
             encrypted_password = entry["password"]
             decrypted_password = self.encrypter.decryption(encrypted_password)
             self.password_table.insert("", "end", values=(entry["website"], entry["email"], decrypted_password, entry["notes"]))
+            decrypted_passwords.append(decrypted_password)
+        
+        return decrypted_passwords
 
     def run(self):
         self.window.mainloop()
