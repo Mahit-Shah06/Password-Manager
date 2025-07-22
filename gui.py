@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 import config
 import db
+from encoding import Encrypter
 
 class GUI:
     def __init__(self):
@@ -20,6 +21,7 @@ class GUI:
         self.entry_boxes = self.left_grid()
         self.right_grid()
 
+        self.encrypter = Encrypter()
         self.show_passwords()
 
     def create_frames(self):
@@ -120,7 +122,8 @@ class GUI:
                 break
 
         if not is_duplicate:
-            data = [website, email, password, notes]
+            Encrypted_password = self.encrypter.encryption(password)
+            data = [website, email, Encrypted_password, notes]
             db.add_data(data)
 
             self.entry_boxes["Website : "].delete(0, "end")
@@ -172,7 +175,9 @@ class GUI:
             self.password_table.delete(item)
         
         for entry in self.data:
-            self.password_table.insert("", "end", values=(entry["website"], entry["email"], entry["password"], entry["notes"]))
+            encrypted_password = entry["password"]
+            decrypted_password = self.encrypter.decryption(encrypted_password)
+            self.password_table.insert("", "end", values=(entry["website"], entry["email"], decrypted_password, entry["notes"]))
 
     def run(self):
         self.window.mainloop()
