@@ -1,21 +1,16 @@
 from cryptography.fernet import Fernet
 import os
+from seed_core import SeedHandler
 
 class Encrypter:
 
     KEY_FILE = "secret.key" 
 
     def __init__(self, key: bytes = None):
-        if key:
-            self.key = key
-        elif os.path.exists(self.KEY_FILE):
-            with open(self.KEY_FILE, 'rb') as f:
-                self.key = f.read()
-        else:
-            self.key = Fernet.generate_key()
-            with open(self.KEY_FILE, 'wb') as f:
-                f.write(self.key)
+        if key is None:
+            raise ValueError("Encryption key must be derived from seed. None provided.")
 
+        self.key = key
         self.fernet = Fernet(self.key)
     
     def encryption(self, data: str) -> str:
