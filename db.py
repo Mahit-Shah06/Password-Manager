@@ -5,19 +5,29 @@ class DataBase:
     def __init__(self):
         mongo_var = "mongodb+srv://Superrr:YlGV7cV7mek8RtJa@passwordmanagerdb.oynnbfo.mongodb.net/?retryWrites=true&w=majority&appName=PasswordManagerDB"
         client = pymongo.MongoClient(mongo_var, tlsCAFile=certifi.where())
-        db = client['password_manager']
-        self.user_collection = db['passwords']
+        self.db = client['password_manager']
+        self.user_collection = self.db['passwords']
 
-    def add_data(self, data):
-        data_entry = {"website" : data[0],
-                    "email" : data[1],
-                    "password" : data[2],
-                    "notes" : data[3]}
+    def check_if_public_key_exists(self, public_key: str) -> bool:
+        collection_names = self.db.list_collection_names()
+        for i in collection_names: print(i)
+        if public_key in collection_names:
+            return False
+
+    def add_data(self, data, public_key):
+        self.user_collection = self.db[public_key]
+        data_entry = {
+            "website" : data[0],
+            "email" : data[1],
+            "password" : data[2],
+            "notes" : data[3]
+        }
         self.user_collection.insert_one(data_entry)
 
-    def fetch_data(self):
-        store_data = self.user_collection.find({})
-        return list(store_data)
+    def fetch_data(self, public_key ):
+        self.user_collection = self.db[public_key]
+        stored_data = self.user_collection.find({})
+        return list(stored_data)
 
     # if __name__ == "__main__":
     #     try:

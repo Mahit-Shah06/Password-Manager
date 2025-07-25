@@ -4,8 +4,6 @@ from seed_core import SeedHandler
 
 class Encrypter:
 
-    KEY_FILE = "secret.key" 
-
     def __init__(self, key: bytes = None):
         if key is None:
             raise ValueError("Encryption key must be derived from seed. None provided.")

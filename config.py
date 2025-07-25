@@ -10,7 +10,14 @@ title_font = ("Segoe UI", 32, "bold")
 with open("themes.json", "r") as file:
     themes = json.load(file)
 
-selected_theme = "sky"
+# --- THEME LOADING LOGIC ---
+# Load the user's selected theme from settings.json
+try:
+    with open("settings.json", "r") as f:
+        settings = json.load(f)
+        selected_theme = settings.get("selected_theme", "default") # Default to "sky" if not found
+except (FileNotFoundError, json.JSONDecodeError):
+    selected_theme = "default" # Default if settings file is missing or broken
 
 theme = themes[selected_theme]
 
