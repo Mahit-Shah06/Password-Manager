@@ -3,7 +3,7 @@ import certifi
 
 class DataBase:
     def __init__(self):
-        mongo_var = "mongodb+srv://Superrr:YlGV7cV7mek8RtJa@passwordmanagerdb.oynnbfo.mongodb.net/?retryWrites=true&w=majority&appName=PasswordManagerDB"
+        mongo_var = "mongodb+srv://Superrr:WKIwYy5aCOi3jJLn@pswdmgrdb.7dx5krf.mongodb.net/?retryWrites=true&w=majority&appName=PswdMgrDB"
         client = pymongo.MongoClient(mongo_var, tlsCAFile=certifi.where())
         self.db = client['password_manager']
         self.user_collection = self.db['passwords']
