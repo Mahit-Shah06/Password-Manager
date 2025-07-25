@@ -2,8 +2,8 @@ import tkinter as kt
 from tkinter import ttk
 from tkinter import messagebox
 import config
-import db
-from encoding import Encrypter
+from db import DataBase
+from crypto_core import Encrypter
 
 class GUI:
     def __init__(self):
@@ -21,6 +21,7 @@ class GUI:
         self.entry_boxes = self.left_grid()
         self.right_grid()
 
+        self.db = DataBase()
         self.encrypter = Encrypter()
         self.decrypted_password_list = self.show_passwords()
 
@@ -85,7 +86,8 @@ class GUI:
         buttons_dict = {
             "Add Password" : [self.add_password, 31, "w"],
             "Import" : [self.import_file, 15, "e"],
-            "Export" : [self.export_file, 15, "e"]
+            "Export" : [self.export_file, 15, "e"],
+            "Connect" :  [self.connect, 10, "w"]
         }
 
         for i in buttons_dict:
@@ -103,6 +105,9 @@ class GUI:
             index+=1
 
         return entry_boxes
+
+    def connect(self):
+        pass
 
     def add_password(self):
         website = self.entry_boxes["Website : "].get()
@@ -128,7 +133,7 @@ class GUI:
         if not is_duplicate:
             Encrypted_password = self.encrypter.encryption(password)
             data = [website, email, Encrypted_password, notes]
-            db.add_data(data)
+            self.db.add_data(data)
 
             self.entry_boxes["Website : "].delete(0, "end")
             self.entry_boxes["Email : "].delete(0, "end")
@@ -173,7 +178,7 @@ class GUI:
         return search_box
     
     def show_passwords(self):
-        self.data = db.fetch_data()
+        self.data = self.db.fetch_data()
         decrypted_passwords = []
 
         for item in self.password_table.get_children():

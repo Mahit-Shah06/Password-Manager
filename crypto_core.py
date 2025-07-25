@@ -23,7 +23,6 @@ class Encrypter:
         return encrypted_data.decode('utf-8')
 
     def decryption(self, token: str) -> str:
-        print(f"Trying to decrypt token: {token}")
         encrypted_data = token.encode('utf-8')
         return self.fernet.decrypt(encrypted_data).decode('utf-8')
 
