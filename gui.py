@@ -1,29 +1,31 @@
 import tkinter as kt
-from tkinter import ttk
-from tkinter import messagebox
-from tkinter import filedialog
+from tkinter import ttk, messagebox, filedialog
+import customtkinter as ckt
 import config
 from db import DataBase
 from seed_core import SeedHandler
 from crypto_core import Encrypter
 import json
+import csv
 
-class GUI:
+class GUI(ckt.CTk):
     def __init__(self):
-        self.window = kt.Tk()
-        self.window.title("Password Manager")
-        screen_height = self.window.winfo_screenheight()
-        screen_width = self.window.winfo_screenwidth()
+        super().__init__()
+
+        self.title("Password Manager")
+        screen_height = self.winfo_screenheight()
+        screen_width = self.winfo_screenwidth()
         self.width = min(config.width, screen_width - 100)
         self.height = min(config.height, screen_height - 100)
-        self.window.geometry(f"{self.width}x{self.height}")
-        self.window.resizable(False, False)
+        self.geometry(f"{self.width}x{self.height}")
 
         self.top_frame, self.left_frame, self.right_frame = self.create_frames()
 
         self.public_key_text = kt.StringVar(value="Public Key: Not Connected")
         self.seed_phrase_text = kt.StringVar(value="Seed Phrase: Not Connected")
         self.seed_phrase_hidden = True
+
+        self.hide_password_var = kt.BooleanVar(value=True)
 
         self.entry_boxes = self.left_grid()
         self.right_grid()
@@ -35,10 +37,14 @@ class GUI:
         self.seed_handler = SeedHandler()
         self.decrypted_password_list = []
 
+        if self.db.db == None:
+            messagebox.showerror("Connection Error", "Could not connect to the database. Features will be limited.")
+            self.destroy()
+
     def create_frames(self):
         frames = {}
 
-        outer_frame = kt.Frame(self.window, bg = config.bdcolor, padx = 5, pady = 5, height = 60)
+        outer_frame = kt.Frame(self, bg = config.bdcolor, padx = 5, pady = 5, height = 60)
         outer_frame.pack(side = "top", fill = "x")
         outer_frame.pack_propagate(False)
 
@@ -55,7 +61,7 @@ class GUI:
 
         for side in sides:
 
-            outer_frame = kt.Frame(self.window, bg = config.bdcolor, padx = 5, pady = 5, width = sides[side])
+            outer_frame = kt.Frame(self, bg = config.bdcolor, padx = 5, pady = 5, width = sides[side])
             outer_frame.pack(side = side, fill = "both", expand = True)
             outer_frame.pack_propagate(False)
 
@@ -94,7 +100,7 @@ class GUI:
         theme_menu.config(bg=config.button_bg, fg=config.button_fg, activebackground=config.hover_bg, font=config.button_font, borderwidth=0, highlightthickness=0, width = 30)
 
         theme_menu["menu"].config(bg=config.button_bg, fg=config.button_fg)
-        theme_menu.grid(row = 0, column = 1, sticky = "n")
+        theme_menu.grid(row = 0, column = 1)
 
         for field_text in fields:
             
@@ -112,8 +118,8 @@ class GUI:
 
         buttons_dict = {
             "Add Password" : [self.add_password, 31, "w"],
-            "Import" : [self.import_file, 31, "n"],
-            "Export" : [self.export_file, 31, "n"],
+            "Import CSV" : [self.import_file, 31, "n"],
+            "Export as CSV" : [self.export_file, 31, "n"],
             "Connect" :  [self.connect, 31, "w"]
         }
 
@@ -144,16 +150,16 @@ class GUI:
             messagebox.showerror("Error", f"Could not save theme settings: {e}")
 
     def connect(self):
-        self.popup = kt.Toplevel(self.window)
-        self.popup.title("Connect Wallet")
+        self.popup = kt.Toplevel(self)
+        self.popup.title("Connect User")
 
-        new_button = kt.Button(self.popup, text="Create New Wallet", command=self.create_wallet)
-        import_button = kt.Button(self.popup, text="Import Wallet", command=self.import_wallet)
+        new_button = kt.Button(self.popup, text="Create New User", command=self.create_User)
+        import_button = kt.Button(self.popup, text="Import User", command=self.import_User)
 
         new_button.pack(pady = 10)
         import_button.pack(pady = 10)
 
-    def create_wallet(self):
+    def create_User(self):
         self.popup.destroy()
         while True:
             seed_phrase = self.seed_handler.generate_seed_phrase()
@@ -163,11 +169,11 @@ class GUI:
             if not self.db.check_if_public_key_exists(public_key_candidate):
                 break
 
-        seed_dialog = kt.Toplevel(self.window)
+        seed_dialog = kt.Toplevel(self)
         seed_dialog.title("Your New Unique Seed Phrase")
         
         # Make the dialog modal
-        seed_dialog.transient(self.window)
+        seed_dialog.transient(self)
         seed_dialog.grab_set()
         
         instruction_label = kt.Label(seed_dialog, text="Please save this seed phrase in a secure place. You will need it to log in.")
@@ -181,8 +187,8 @@ class GUI:
 
         # --- Function to copy the seed phrase to the clipboard ---
         def copy_seed():
-            self.window.clipboard_clear()
-            self.window.clipboard_append(seed_phrase)
+            self.clipboard_clear()
+            self.clipboard_append(seed_phrase)
             # Optional: Give user feedback
             copy_button.config(text="Copied!")
 
@@ -197,20 +203,20 @@ class GUI:
         ok_button.pack(side="left", padx=5)
         
         # Wait for the user to close the dialog before proceeding
-        self.window.wait_window(seed_dialog)
+        self.wait_window(seed_dialog)
 
         messagebox.showinfo(
             "Info",
-            "Please now log in using the 'Import Wallet' option."
+            "Please now log in using the 'Import User' option."
         )
 
         for item in self.password_table.get_children():
             self.password_table.delete(item)
 
-    def import_wallet(self):
+    def import_User(self):
         self.popup.destroy()
-        import_window = kt.Toplevel(self.window)
-        import_window.title("Import Wallet")
+        import_window = kt.Toplevel(self)
+        import_window.title("Import User")
         
         label = kt.Label(import_window, text="Enter your seed phrase:")
         label.pack(pady=5)
@@ -234,63 +240,149 @@ class GUI:
                 import_window.destroy()
                 self.show_passwords()
 
-                messagebox.showinfo("Success", "Wallet successfully imported and logged in")
+                messagebox.showinfo("Success", "User successfully imported and logged in")
 
             except Exception as e:
                 messagebox.showerror(
                     "Import Failed", 
                     "The seed phrase you entered is invalid. Please check it and try again.",
-                    parent=import_window
+                    parent = import_window
                 )
 
         submit_button = kt.Button(import_window, text="Submit", command=on_submit)
         submit_button.pack(pady=10)
 
+    def add_entry(self, website, email, password, notes):
+        
+        missing_field = False
+        if not website or not email or not password:
+            missing_field = not missing_field
+
+        is_duplicate = False
+        for entry in self.data:
+            decrypted_password = self.encrypter.decryption(entry["password"])
+            if entry["website"] == website and entry["email"] == email and decrypted_password == password:
+                is_duplicate = True
+                break
+
+        if is_duplicate:
+            return '0', f"This entry for '{website}' already exists and was not added."
+
+        encrypted_password = self.encrypter.encryption(password)
+        data = [website, email, encrypted_password, notes]
+        success, message = self.db.add_data(data, self.public_key)
+
+        if success:
+            return '1', 'Data added successfully'
+        elif missing_field:
+            return '2', 'A required field (website, email, or password) is missing.'
+        else:
+            return '-1', message
+
     def add_password(self):
+
         website = self.entry_boxes["Website : "].get()
         email = self.entry_boxes["Email : "].get()
         password = self.entry_boxes["Password : "].get()
         notes = self.entry_boxes["Notes : "].get("1.0", "end-1c")
 
         if not self.encrypter or not self.db:
-            messagebox.showerror("Error", "Please connect a wallet first.")
+            messagebox.showerror("Error", "Please connect a User first.")
             return
 
-        else:
-            if not website or not email or not password:
-                messagebox.showerror(title = "Error", message = "Please fill in all the required fields.")
-                return
+        status, message = self.add_entry(website, email, password, notes)
 
-            is_duplicate = False
+        if status == '1':
+            self.entry_boxes["Website : "].delete(0, "end")
+            self.entry_boxes["Email : "].delete(0, "end")
+            self.entry_boxes["Password : "].delete(0, "end")
+            self.entry_boxes["Notes : "].delete("1.0", "end")
             
-            for entry in self.data:
-                for list_pass in self.decrypted_password_list:
-                    if entry["website"] == website and entry["email"] == email and list_pass == password:
-                        is_duplicate = True 
-                        messagebox.showerror(title = "Error", message=f"This email and password already exists for {website}.")
-                        break
-                if is_duplicate:
-                    break
+            messagebox.showinfo("Success", message)
+            self.show_passwords()
 
-            if not is_duplicate:
-                Encrypted_password = self.encrypter.encryption(password)
-                data = [website, email, Encrypted_password, notes]
-                self.db.add_data(data, self.public_key)
+        elif status == '0':
+            messagebox.showwarning("Duplicate", message)
+        
+        elif status == '2':
+            messagebox.showerror('Missing', message)
+        
+        else:
+            messagebox.showerror("Error", message)
 
-                self.entry_boxes["Website : "].delete(0, "end")
-                self.entry_boxes["Email : "].delete(0, "end")
-                self.entry_boxes["Password : "].delete(0, "end")
-                self.entry_boxes["Notes : "].delete("1.0", "end")
-
-                messagebox.showinfo(title="Success", message="Data added successfully!")
-
-                self.show_passwords()
 
     def import_file(self):
-        pass
+        if not self.encrypter or not self.data:
+            messagebox.showerror("Import Error", "Please connect a User to import your data.")
+            return
+        
+        messagebox.showinfo(
+            "CSV Format Required",
+            "Please ensure your CSV file has the following columns in order:\n\nWebsite, Email, Password, Notes"
+        )
+
+        file_path = filedialog.askopenfilename(
+            filetypes = [("CSV files", ".csv"), ("All files", "*.*")],
+            title = "Importing 101"
+        )
+
+        if not file_path: return
+
+        try:
+            with open(file_path, "r", encoding = 'utf-8') as f:
+                reader = csv.reader(f)
+                next(reader)
+
+                added_count = skipped_count = error_count = 0
+
+                for row in reader:
+                    website, email, password, notes = row[0], row[1], row[2], row[3]
+                    status, message = self.add_entry(website, email, password, notes)
+
+                    if status == '1':
+                        added_count += 1
+                    elif status == '0':
+                        skipped_count += 1
+                    else: # 'ERROR'
+                        error_count += 1
+            
+            summary_message = f"Import Complete!\n\n" \
+                            f"Successfully Imported: {added_count}\n" \
+                            f"Skipped (duplicates): {skipped_count}\n" \
+                            f"Errors: {error_count}"
+            
+            messagebox.showinfo("Import Summary", summary_message)
+            self.show_passwords()
+        
+        except Exception as e:
+            messagebox.showerror("Error", f"Error: {e}")
 
     def export_file(self):
-        pass
+        if not self.encrypter or not self.data:
+            messagebox.showerror("Export Error", "Please connect a User and load your data first.")
+            return
+        
+        file_path = filedialog.asksaveasfilename(
+            defaultextension = ".csv",
+            filetypes = [("CSV files", ".csv"), ("All files", "*.*")],
+            title = "Export Passwords..."
+        )
+
+        if not file_path: return
+        
+        try:
+            with open(file_path, "w", newline = "", encoing = 'utf-8') as f:
+                writer = csv.writer(f)                
+                writer.writerow(["Website", "Email", "Password", "Notes"])
+
+                for entry in self.data:
+                    decrypted_password = self.encrypter.decryption(entry["password"])
+                    writer.writerow([entry["website"], entry["email"], decrypted_password, entry["notes"]])
+                
+            messagebox.showinfo("Success", f"Data was exported successfully to {file_path}")
+        
+        except Exception as e:
+            messagebox.showerror("Error", f"Error: {e}")
 
     def right_grid(self):
         grid_container = kt.Frame(self.right_frame, bg=config.bgcolor)
@@ -335,13 +427,23 @@ class GUI:
         export_button = kt.Button(button_frame, text = "Export Seed Phrase", bg = config.button_bg, font = config.button_font, fg = config.button_fg, command = self.export_seed_phrase)
         export_button.pack(side = "left", padx = 5)
 
+        hide_password_check = ttk.Checkbutton(
+            grid_container,
+            text="Hide Passwords",
+            variable=self.hide_password_var,
+            onvalue=True,
+            offvalue=False,
+            command=self.show_passwords # Refresh the table when clicked
+        )
+        hide_password_check.grid(row=2, column=0, columnspan=2, pady=5)
+
         return search_box
     
     def copy_seed_phrase(self):
         if not self.seed_phrase:
             messagebox.showerror("Error", "Please Connect your seed phrase first")
             return
-        self.window.clipboard_append(self.seed_phrase)
+        self.clipboard_append(self.seed_phrase)
         messagebox.showinfo("Success", "Seed Phrase copied to your clipboard")
 
     def export_seed_phrase(self):
@@ -367,19 +469,21 @@ class GUI:
     def show_passwords(self):
         if not self.public_key:
             return
-        
+
         self.data = self.db.fetch_data(self.public_key)
         decrypted_passwords = []
 
         for item in self.password_table.get_children():
             self.password_table.delete(item)
-        
+
+        should_hide = self.hide_password_var.get()
+
         for entry in self.data:
             encrypted_password = entry["password"]
             decrypted_password = self.encrypter.decryption(encrypted_password)
-            self.password_table.insert("", "end", values=(entry["website"], entry["email"], decrypted_password, entry["notes"]))
+            display_password = "********" if should_hide else decrypted_password
+            self.password_table.insert("", "end", values=(entry["website"], entry["email"], display_password, entry["notes"]))
             decrypted_passwords.append(decrypted_password)
 
-
     def run(self):
-        self.window.mainloop()
+        self.mainloop()

@@ -1,6 +1,4 @@
 from cryptography.fernet import Fernet
-import os
-from seed_core import SeedHandler
 
 class Encrypter:
 

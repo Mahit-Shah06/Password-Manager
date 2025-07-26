@@ -1,7 +1,7 @@
 from mnemonic import Mnemonic
 import hashlib
-from cryptography.fernet import Fernet
 import base64
+from cryptography.fernet import Fernet
 
 class SeedHandler:
     def __init__(self):

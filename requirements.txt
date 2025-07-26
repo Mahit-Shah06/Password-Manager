@@ -1,0 +1,9 @@
+# requirements.txt
+python 3.12
+pymongo
+certifi
+cryptography
+mnemonic
+python-dotenv
+
+run pip install pymongo, certifi, cryptography, mnemonic, python-dotenv
